@@ -10,7 +10,7 @@ namespace DotNetDemo.Test
         public void addTestMethod()
         {
             Calculator calculator = new Calculator();
-            Assert.AreEqual(3, calculator.add(1, 1));
+            Assert.AreEqual(2, calculator.add(1, 1));
         }
     }
 }
