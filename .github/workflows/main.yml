@@ -40,44 +40,16 @@ jobs:
           source-url: https://nuget.pkg.github.com/prgscloud/index.json
         env:
           NUGET_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
-      
-      - name: Restore nuget packages for the avaiable solutions
-        run: |
-              $solutions=Get-ChildItem $GITHUB_WORKSPACE -recurse -force -filter "*.sln" | Get-Unique
-              foreach ($solution in $solutions)
-              {
-                nuget restore $soluton
-              }
-              
-      
-      - name: Build Solutions
-        run: |
-             $solutions=Get-ChildItem $GITHUB_WORKSPACE -recurse -force -filter "*.sln" | Get-Unique
-             foreach($solution in $solutions)
-             {
-                msbuild $solution
-             }
-              
-      - name: Run Unit tests
-        run: | 
-              $files=dir "*.Test\bin\Debug\*.Test.dll" | Get-Unique
-              
-              $testlist="";
-              foreach ($file in $files)
-              { 
-                $testlist+=$file.FullName + " ";
-              }
-              
-              Start-Process "vstest.console.exe" -ArgumentList "$testlist /Parallel /Settings:coverage.runsettings /Logger:trx" -NoNewWindow -Wait
-
-      - name: Parse the Unit test results
-        uses: NasAmin/trx-parser@v0.0.4
-        id: trx-parser
-        with:
-          TRX_PATH: ${{ github.workspace }}\TestResults
-          REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          IGNORE_FAILURE: false
-
+     
+      - name: Restore Dependencies
+        run: cd DotNetDemo && dotnet restore
+        
+      - name: Run Build
+        run: cd DotNetDemo && dotnet build
+        
+      - name: Run Tests
+        run: cd DotNetDemo.Test && dotnet test
+        
       - name: Create nuget package
         run: nuget pack DotNetDemo
       
